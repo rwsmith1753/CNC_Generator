@@ -1,5 +1,5 @@
 %
-Osample( cncsample.TXT )
+OSAMPLECNC
 ( 3/1/2022 AT 7:29 AM )
 ( OPERATION 1: CONTOUR )
 ( TOOL 1: 0.03125 RAD. 80-DEG. DIAMOND )

@@ -1,25 +1,38 @@
 import tkinter as tk
 from tkinter.filedialog import *
-#from gcodes import get_gcode
-#from mcodes import get_mcode
-import gcodes2
-import mcodes2
+import gcodes
+import mcodes
 
+class Col0:
+  def __init__(self):
+    self.orow = 0
+    self.newrow = self.orow + 1
+    self.svrow = self.newrow + 1
+    self.grow = self.svrow + 1
+    self.xrow = self.grow + 1
+    self.yrow = self.xrow + 1
+    self.srow = self.yrow + 1
+    self.frow = self.srow + 1
+    self.mrow = self.frow + 1
+    self.clrow = self.mrow + 1
+    self.nlrow = self.clrow + 1
 
-orow = 0
-newrow = orow + 1
-svrow = newrow + 1
-grow = svrow + 1
-xrow = grow + 1
-yrow = xrow + 1
-srow = yrow + 1
-frow = srow + 1
-mrow = frow + 1
-nlrow = mrow + 1
-clrow = nlrow + 1
+class Col1:
+  def __init__(self):
+    self.lblrow = 0
+    self.comrow = self.lblrow + 1
+    self.cbtnrow = self.comrow + 1
+    self.grow = self.cbtnrow + 3
+    self.xrow = self.grow + 1
+    self.yrow = self.xrow + 1
+    self.srow = self.yrow + 1
+    self.frow = self.srow + 1
+    self.mrow = self.frow + 1
+    self.clrow = self.mrow + 1
+    self.nlrow = self.clrow + 1
 
-
-
+col0 = Col0()
+col1 = Col1()
 
 def open_file():
   """Open a file for editing."""
@@ -38,6 +51,7 @@ def open_file():
 #==Create new program, and insert program name
 def create_new():
   """Create a new .txt file to store the CNC code"""
+  global filepath
   filepath = asksaveasfilename(
 
     defaultextension=".txt",
@@ -60,6 +74,13 @@ def save_file():
     filepath.write(prog)
     filepath.close()
 
+def ins_com():
+  com = comment.get('1.0', 'end-1c')
+
+  program.insert(tk.INSERT, f'(  {com}  )\n')
+
+  comment.delete('1.0', 'end-1c')
+    
 
 def add_g():
   selg = lst_g.get(lst_g.curselection())
@@ -72,30 +93,32 @@ def add_g():
   
   
 def add_x():
-  x = x_coor.get('1.0', 'end-1c')
+  x = x_coor.get()
   if isinstance(x,int):
     cline.insert(tk.INSERT, f'X{x}.')  
   else:
     cline.insert(tk.INSERT, f'X{x}')
-  x_coor.delete('1.0', 'end-1c')
+  x_coor.delete(0, END)
 
 def add_y():
-  y = y_coor.get('1.0', 'end-1c')
+  # y = y_coor.get('1.0', 'end-1c')
+  y = y_coor.get()
+  
   if isinstance(y,int):
     cline.insert(tk.INSERT, f'Y{y}.')  
   else:
     cline.insert(tk.INSERT, f'Y{y}')
-  y_coor.delete('1.0', 'end-1c')
+  y_coor.delete(0, END)
 
 def add_s():
-  s = speed.get('1.0', 'end-1c')
+  s = speed.get()
   cline.insert(tk.INSERT, f'S{s}')
-  speed.delete('1.0', 'end-1c')
+  speed.delete(0, END)
 
 def add_f():
-  f = feed.get('1.0', 'end-1c')
+  f = feed.get()
   cline.insert(tk.INSERT, f'F{f}')
-  feed.delete('1.0', 'end-1c')
+  feed.delete(0, END)
   
 
 def add_m():
@@ -107,9 +130,9 @@ def add_m():
     cline.insert(tk.INSERT, m[0])
 
 def new_line():
-  code = cline.get('1.0', 'end-1c')
+  code = cline.get()
   program.insert(tk.INSERT, f'{code}\n')
-  cline.delete('1.0', 'end-1c')
+  cline.delete(0, END)
 
 
 
@@ -118,94 +141,103 @@ def new_line():
 #===Window Config  
 window = tk.Tk()
 window.title('CNC Translator')
-#window.rowconfigure([0,1,2,3,4,5,6,7], minsize = 42)
+window.rowconfigure(0, minsize = 1)
 #window.columnconfigure(0, minsize = 200)
 window.geometry('800x800')
 
 #===Button Config
 frm_buttons = tk.Frame(window, relief=tk.RAISED, bd=1)
 frm_buttons.columnconfigure(0, minsize = 300)
-frm_buttons.grid(column=0, rowspan = 12, sticky="nsew")
+frm_buttons.grid(column=0, rowspan = 11, sticky="nsew")
 
 #===Text Box Config
 txt_box = tk.Frame(window, bd=1)
-txt_box.rowconfigure(0, minsize = 42)
-txt_box.grid(column=1, row = 3, rowspan = 12, sticky="nsew")
+txt_box.rowconfigure(0, minsize = 20)
+txt_box.grid(column=1, row = 4, rowspan = 8, sticky="nsew")
 
-#=====Text Window
+#=====Program Window
 program = tk.Text(window)
-program.grid(column=2, row = 0, rowspan = 12, sticky="nsw")
+program.grid(column=2, row = 0, rowspan = 8, sticky="nsw")
 program.insert(tk.INSERT,'%\n')
+
+#=====Comment Window
+com_label = tk.Label(text = 'Comment')
+com_label.grid(column = 1, row = col1.lblrow, rowspan = 1,sticky = 'sew')
+comment = tk.Text(window, height = 3, width = 1)
+comment.grid(column=1, row = col1.comrow, rowspan = 1, sticky="nsew")
+btn_com = tk.Button(window, text = 'Insert Comment', command = ins_com)
+btn_com.grid(column = 1, row = col1.cbtnrow, rowspan = 1, stick = 'new', padx = 5, pady = 5)
 
 #=====Open Program
 btn_open = tk.Button(frm_buttons, text = 'Open Program', command = open_file)
-btn_open.grid(column = 0, row = orow, stick = 'nsew', padx = 5, pady = 5)
+btn_open.grid(column = 0, row = col0.orow, sticky = 'nsew', padx = 5, pady = 5)
 
 #=====Create New Program
 btn_createnew = tk.Button(frm_buttons, text="Create New Program", command=create_new)
-btn_createnew.grid(column=0, row=newrow, sticky="nsew", padx=5, pady=5)
+btn_createnew.grid(column=0, row=col0.newrow, sticky="nsew", padx=5, pady=5)
 
 #=====Save Program
 btn_save = tk.Button(frm_buttons, text = 'Save Program', command = save_file)
-btn_save.grid(column = 0, row = svrow, sticky = 'nsew', padx = 5, pady = 5)
+btn_save.grid(column = 0, row = col0.svrow, sticky = 'nsew', padx = 5, pady = 5)
 
 #=====G Code list
 #g = StringVar()
 #g.set(gcodes2.gcode_list[1])
 lst_g = tk.Listbox(frm_buttons)
-lst_g.grid(column = 0, row = grow, sticky = 'new')
+lst_g.grid(column = 0, row = col0.grow, sticky = 'new')
 lst_g.insert(tk.END, 'None')
-for i in gcodes2.gcode_list:
+for i in gcodes.gcode_list:
   lst_g.insert(tk.END, i)
 lst_g.select_set(0)
-btn_g = tk.Button(txt_box, text = 'Insert G-Code', command = add_g)
-btn_g.grid(column = 1, row = grow, sticky = 'new', padx = 5, pady = 5)
+btn_g = tk.Button(window, text = 'Insert G-Code', command = add_g)
+btn_g.grid(column = 1, row = col1.grow, rowspan = 1, sticky = 'new', padx = 5, pady = 5)
 
 #=====Code to insert
 # cline = tk.Text(txt_box, height = 1, width = 20)
 # cline.grid(column = 1, row = 4, sticky = 'nsew', padx = 5, pady = 8)
 
 #=====X Coordinate
-x_coor = tk.Text(txt_box, height = 1, width = 20)
-x_coor.grid(column = 1, row = xrow, sticky = 'new', padx = 5, pady = 8)
+x_coor = tk.Entry(window)
+x_coor.grid(column = 1, row = col1.grow, sticky = 'sew', padx = 5, pady = 10)
 btn_x = tk.Button(frm_buttons, text = 'X-Coordinate', command = add_x)
-btn_x.grid(column = 0, row=xrow, sticky = 'nsew', padx = 5, pady = 5)
+btn_x.grid(column = 0, row=col0.xrow, sticky = 'nsew', padx = 5, pady = 5)
 
 
 #=====Y Coordinate
-y_coor = tk.Text(txt_box, height = 1, width = 20)
-y_coor.grid(column = 1, row = yrow, sticky = 'new', padx = 5, pady = 8)
+# y_coor = tk.Text(txt_box, height = 1, width = 20)
+y_coor = tk.Entry(window)
+y_coor.grid(column = 1, row = col1.xrow, sticky = 'new', padx = 5, pady = 10)
 btn_y = tk.Button(frm_buttons, text = 'Y-Coordinate', command = add_y)
-btn_y.grid(column = 0, row=yrow, sticky = 'nsew', padx = 5, pady = 5)
+btn_y.grid(column = 0, row=col0.yrow, sticky = 'nsew', padx = 5, pady = 5)
 
 #=====Speed
-speed = tk.Text(txt_box, height = 1, width = 20)
-speed.grid(column = 1, row = srow, sticky = 'new', padx = 5, pady = 8)
+speed = tk.Entry(window)
+speed.grid(column = 1, row = col1.xrow, sticky = 'sew', padx = 5, pady = 10)
 spd_btn = tk.Button(frm_buttons, text = 'Speed (RPM)', command = add_s)
-spd_btn.grid(column = 0, row=srow, sticky = 'nsew', padx = 5, pady = 5)
+spd_btn.grid(column = 0, row=col0.srow, sticky = 'nsew', padx = 5, pady = 5)
 
 #=====Feed
-feed = tk.Text(txt_box, height = 1, width = 20)
-feed.grid(column = 1, row = frow, sticky = 'new', padx = 5, pady = 8)
+feed = tk.Entry(window)
+feed.grid(column = 1, row = col1.yrow, sticky = 'new', padx = 5, pady = 5)
 fd_btn = tk.Button(frm_buttons, text = 'Feed (Inch/Rev)', command = add_f)
-fd_btn.grid(column = 0, row=frow, sticky = 'nsew', padx = 5, pady = 5)
+fd_btn.grid(column = 0, row=col0.frow, sticky = 'nsew', padx = 5, pady = 5)
 
 #=====M Code
 lst_m = tk.Listbox(frm_buttons)
-lst_m.grid(column = 0, row = mrow, sticky = 'new')
+lst_m.grid(column = 0, row = col0.mrow, sticky = 'new')
 lst_m.insert(tk.END, 'None')
-for i in mcodes2.mcode_list:
+for i in mcodes.mcode_list:
   lst_m.insert(tk.END, i)
-btn_m = tk.Button(txt_box, text = 'Insert M-Code', command = add_m)
-btn_m.grid(column = 1, row = mrow, sticky = 'new')
+btn_m = tk.Button(window, text = 'Insert M-Code', command = add_m)
+btn_m.grid(column = 1, row = col1.yrow, sticky = 'sew')
 
 #=====New line
-btn_NL = tk.Button(txt_box, text = 'New Line', command = new_line)
-btn_NL.grid(column = 1, row = nlrow, sticky = 'nsew', padx = 5, pady = 8)
+btn_NL = tk.Button(window, text = 'New Line', command = new_line)
+btn_NL.grid(column = 1, row = col1.srow, sticky = 'new', padx = 5, pady = 8)
 
 #=====Code to insert
-cline = tk.Text(txt_box, height = 1, width = 20)
-cline.grid(column = 1, row = clrow, sticky = 'nsew', padx = 5, pady = 8)
+cline = tk.Entry(window)
+cline.grid(column = 1, row = col1.srow, sticky = 'sew', padx = 5, pady = 8)
 
 
 
